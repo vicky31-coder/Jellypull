@@ -1,99 +1,160 @@
-# Jellypull 🪼
+# Jellypull
 
-> **Fast, private, and beautifully unified torrent indexer designed for self-hosters and Jellyfin enthusiasts.**
+Jellypull is a high-performance, privacy-focused media torrent aggregator engineered for personal media servers, home laboratories, and Jellyfin ecosystems.
 
-Jellypull queries six public torrent indexers concurrently, automatically prioritizing verified releases and high-availability seeds, with built-in master password security and strict Safe Search (18+ content restriction) by default.
-
----
-
-## ✨ Features
-
-- **⚡ Concurrent Aggregation**: Fans out queries in parallel across **SolidTorrents**, **ThePirateBay (ApiBay)**, **YTS**, **EZTV**, **1337x**, and **TorrentGalaxy**.
-- **💎 SolidTorrents Priority**: Automatically applies quality scoring boosts to SolidTorrents DHT results.
-- **🔞 Safe Search by Default**: Strictly blocks explicit adult content, porn studio titles, and 18+ indexer categories out of the box.
-- **🔒 Single-Account Protection**: Optional master password (`JELLYPULL_PASSWORD`) locks your instance with an Apple-style unlock modal, secure session cookies, and API protection.
-- **⚡ Hot Query Cache**: 5-minute in-memory caching provides instant (<1ms) responses on repeated queries without triggering upstream IP limits.
-- **🍏 Apple-Inspired UI**: Built with Svelte 5 and TypeScript, featuring spotlight search, slide-over filters, and instant magnet copy feedback.
-- **🛡️ Isolated Microservice Architecture**: The scraper backend stays isolated inside the internal Docker network and is never exposed to the public internet.
+It consolidates queries across multiple distributed indexers concurrently, evaluates release quality through a deterministic scoring heuristic, and presents results through an interface designed around clarity, precision, and speed.
 
 ---
 
-## 🚀 Quick Start (For Friends & Homelabs)
+## Overview
 
-You don't need Rust or Node.js installed. Just Docker and Docker Compose.
+Public media indexing is traditionally fragmented across disparate web scrapers, unstable ad-injected interfaces, and inconsistent data formats. Jellypull decouples user interaction from upstream indexers by introducing an isolated, asynchronous gateway layer.
 
-### 1. Download Docker Compose
+Searches execute concurrently across six major providers, with automatic deduplication by InfoHash and prioritized weighting for high-integrity DHT sources like SolidTorrents. Safe Search is strictly enforced at both category and lexical levels by default.
 
-Create a directory on your server or NAS and download `docker-compose.yml`:
+---
+
+## Architectural Highlights
+
+### Concurrent Query Aggregation
+Queries fan out simultaneously using non-blocking asynchronous Tokio tasks across SolidTorrents, The Pirate Bay (ApiBay), YTS, EZTV, 1337x, and TorrentGalaxy. Each provider task operates with a bounded timeout to ensure slow or unresponsive indexers never degrade overall response latency.
+
+### Deterministic Quality Scoring
+Results are systematically ranked based on seeder availability, codec profiles, and audio/video release standards. SolidTorrents feeds receive structural priority, followed by high-definition tiers (UHD, 2160p, Blu-ray REMUX, 1080p, WEB-DL).
+
+### Content Restriction by Default
+Safe Search is enabled by default to prevent explicit material from appearing in general queries. The system enforces multi-tier filtering:
+- Category exclusion: Dropping adult and explicit classifications (including ApiBay categories 500 through 599).
+- Lexical heuristic: Word-boundary evaluation stripping pornographic labels, production studios, and adult keywords without false positives on standard titles.
+
+### Single-Instance Access Security
+Designed for single-operator homelab deployment. An optional master access passphrase (`JELLYPULL_PASSWORD`) secures the application layer and API endpoints with authenticated session cookies and Bearer tokens.
+
+### In-Memory Hot Query Caching
+Repeated queries are fulfilled from an in-memory cache with a 5-minute time-to-live. This minimizes redundant external network requests and mitigates IP-level rate limiting from upstream indexers.
+
+### Decoupled Service Boundary
+The scraper engine operates strictly within an isolated internal bridge network, remaining completely inaccessible from the host network or public internet. Only the web gateway service exposes a configurable port.
+
+---
+
+## Quick Start
+
+Jellypull is distributed as a lightweight container image for container runtimes supporting Docker Compose.
+
+### 1. Retrieve the Configuration Files
 
 ```bash
-mkdir jellypull && cd jellypull
-curl -sO https://raw.githubusercontent.com/vicky31-coder/Jellypull/main/docker-compose.yml
-curl -sO https://raw.githubusercontent.com/vicky31-coder/Jellypull/main/.env.example
-cp .env.example .env
+mkdir -p jellypull && cd jellypull
+curl -fsSL https://raw.githubusercontent.com/vicky31-coder/Jellypull/main/docker-compose.yml -o docker-compose.yml
+curl -fsSL https://raw.githubusercontent.com/vicky31-coder/Jellypull/main/.env.example -o .env
 ```
 
-### 2. Configure Environment (`.env`)
+### 2. Configure Environment
 
-Edit `.env` with your desired master password and port:
+Edit `.env` to define your instance port and master password:
 
 ```env
-# Master password to lock your personal instance (leave empty for open LAN mode)
-JELLYPULL_PASSWORD=choose_your_password_here
+# Master passphrase to lock your personal instance (leave empty for open LAN mode)
+JELLYPULL_PASSWORD=your_secure_passphrase
 
-# Port to access the web interface (default: 8045)
+# Port exposed on the host system
 PORT=8045
 
 # Enforce Safe Search by default (1 = enabled, 0 = disabled)
 SAFE_SEARCH=1
 ```
 
-### 3. Launch
+### 3. Start the Services
 
 ```bash
 docker compose up -d
 ```
 
-Open your browser at **`http://localhost:8045`** (or your server's IP).
+Access the interface at `http://localhost:8045` (or your server's local IP address).
 
 ---
 
-## 🛠️ Configuration Reference
-
-| Environment Variable | Default | Description |
-| :--- | :--- | :--- |
-| `JELLYPULL_PASSWORD` | *(empty)* | If set, requires this master password to access the UI and API. |
-| `PORT` | `8045` | Port mapped on your host machine. |
-| `SAFE_SEARCH` | `1` | Enables 18+/NSFW content filtering by default (1 = ON, 0 = OFF). |
-| `SCRAPER_URL` | `http://jellypull-scraper:8046` | Internal Docker address of the scraper microservice. |
-
----
-
-## 🏗️ Architecture
+## System Architecture
 
 ```
-Internet / User
-      │
-      ▼ (Port 8045)
-┌─────────────────────────────────┐
-│     jellypull-web (Axum)        │
-│  - Single-file embedded Svelte  │
-│  - Master password auth check   │
-│  - In-memory 5-min hot cache    │
-└────────────────┬────────────────┘
-                 │ Internal Docker Network (Not exposed)
-                 ▼
-┌─────────────────────────────────┐
-│   jellypull-scraper (Tokio)     │
-│  - Concurrent 6-indexer fanout │
-│  - Category 500-599 TPB filter  │
-│  - Smart title NSFW filter      │
-│  - SolidTorrents +10k boost     │
-└─────────────────────────────────┘
+[ Client Interface / API Consumer ]
+                 │
+                 ▼  Port 8045 (Configurable)
+┌───────────────────────────────────────────────┐
+│              jellypull-web                    │
+│  - Embedded Single-Page Application (Svelte)  │
+│  - Master Passphrase Authentication Guard     │
+│  - In-Memory Hot Cache (5-Minute TTL)         │
+│  - Gzip / Brotli Payload Compression          │
+└───────────────────────┬───────────────────────┘
+                        │
+                        │ Internal Docker Network (jellypull-internal)
+                        ▼
+┌───────────────────────────────────────────────┐
+│            jellypull-scraper                  │
+│  - Asynchronous Tokio Task Fan-Out            │
+│  - Providers: Solid, TPB, YTS, EZTV, 1337X, TGX│
+│  - Multi-Tier Category & Keyword Filtering    │
+│  - SolidTorrents Heuristic Priority (+10,000) │
+└───────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📄 License
+## Configuration Reference
 
-MIT License. Free and open source.
+| Variable | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `JELLYPULL_PASSWORD` | String | *(None)* | Master access passphrase. When specified, locks all UI views and API routes behind authentication. |
+| `PORT` | Integer | `8045` | TCP port published by the web gateway container. |
+| `SAFE_SEARCH` | Integer | `1` | Enforces adult and explicit category filtering (1 = Active, 0 = Inactive). |
+| `SCRAPER_URL` | URL | `http://jellypull-scraper:8046` | Internal network endpoint of the upstream scraper microservice. |
+| `RUST_LOG` | String | `info` | Logging verbosity filter (`error`, `warn`, `info`, `debug`, `trace`). |
+
+---
+
+## Building from Source
+
+### Prerequisites
+- Rust 1.75 or higher
+- Node.js 18 or higher
+- npm 9 or higher
+
+### Build Steps
+
+1. **Compile the Frontend Bundle**:
+   ```bash
+   cd frontend
+   npm install
+   npm run build
+   cd ..
+   ```
+
+2. **Compile the Binary**:
+   ```bash
+   cargo build --release
+   ```
+
+3. **Execute**:
+   ```bash
+   # Run the web daemon
+   ./target/release/jellypull serve --port 8045
+
+   # Run the standalone scraper service
+   ./target/release/jellypull scraper --port 8046
+   ```
+
+---
+
+## Security Considerations
+
+- **Network Isolation**: Always keep `jellypull-scraper` confined to internal container networking. It should never be directly reachable via reverse proxies or external routing rules.
+- **TLS Termination**: For remote access over public networks, place Jellypull behind a reverse proxy (such as Caddy, Nginx, or Cloudflare Tunnel) configured for TLS termination.
+- **Safe Search Integrity**: The Safe Search policy defaults to active on initial installation to prevent incidental exposure to explicit content.
+
+---
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
