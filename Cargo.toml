@@ -1,0 +1,25 @@
+[package]
+name = "jellypull"
+version = "0.1.0"
+edition = "2021"
+authors = ["Antigravity"]
+description = "A lightweight, high-performance CLI tool and web daemon for media acquisition with qBittorrent and Jellyfin"
+
+[dependencies]
+tokio = { version = "1.38", features = ["full"] }
+tokio-stream = "0.1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "cookies", "multipart", "rustls-tls-native-roots"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.8"
+clap = { version = "4.5", features = ["derive"] }
+scraper = "0.19"
+indicatif = { version = "0.17", features = ["tokio"] }
+colored = "2.1"
+anyhow = "1.0"
+thiserror = "1.0"
+regex = "1.10"
+url = "2.5"
+dirs = "5.0"
+axum = "0.7"
+tower-http = { version = "0.5", features = ["cors", "fs", "compression-gzip", "set-header"] }

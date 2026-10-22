@@ -1,0 +1,37 @@
+name: jellypull
+
+services:
+  jellypull-scraper:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jellypull-scraper
+    command: ["jellypull", "scraper", "--port", "8046"]
+    networks:
+      - jellypull-internal
+    environment:
+      - RUST_LOG=info
+    restart: unless-stopped
+
+  jellypull-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jellypull-web
+    command: ["jellypull", "serve", "--port", "8045"]
+    ports:
+      - "${PORT:-8045}:8045"
+    networks:
+      - jellypull-internal
+    environment:
+      - RUST_LOG=info
+      - SCRAPER_URL=http://jellypull-scraper:8046
+      - JELLYPULL_PASSWORD=${JELLYPULL_PASSWORD:-}
+      - SAFE_SEARCH=${SAFE_SEARCH:-1}
+    depends_on:
+      - jellypull-scraper
+    restart: unless-stopped
+
+networks:
+  jellypull-internal:
+    driver: bridge
