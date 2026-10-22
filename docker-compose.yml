@@ -2,6 +2,7 @@ name: jellypull
 
 services:
   jellypull-scraper:
+    image: ghcr.io/vicky31-coder/jellypull:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,6 +15,7 @@ services:
     restart: unless-stopped
 
   jellypull-web:
+    image: ghcr.io/vicky31-coder/jellypull:latest
     build:
       context: .
       dockerfile: Dockerfile

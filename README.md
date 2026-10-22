@@ -28,8 +28,8 @@ Create a directory on your server or NAS and download `docker-compose.yml`:
 
 ```bash
 mkdir jellypull && cd jellypull
-curl -sO https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/jellypull/main/docker-compose.yml
-curl -sO https://raw.githubusercontent.com/YOUR_GITHUB_USERNAME/jellypull/main/.env.example
+curl -sO https://raw.githubusercontent.com/vicky31-coder/Jellypull/main/docker-compose.yml
+curl -sO https://raw.githubusercontent.com/vicky31-coder/Jellypull/main/.env.example
 cp .env.example .env
 ```
 
