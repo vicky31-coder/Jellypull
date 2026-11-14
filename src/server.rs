@@ -148,10 +148,14 @@ pub async fn run_scraper_server(port: u16, config: &Config) -> Result<()> {
         .layer(CompressionLayer::new())
         .with_state(scraper);
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], port));
+    let bind_ip: std::net::IpAddr = std::env::var("SCRAPER_HOST")
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(std::net::IpAddr::V4(std::net::Ipv4Addr::UNSPECIFIED));
+    let addr = SocketAddr::new(bind_ip, port);
     println!("=========================================");
     println!("⚡ Launching Standalone Scraper Microservice...");
-    println!("Listening for backend scrape requests at http://localhost:{}", port);
+    println!("Listening for backend scrape requests at http://{}:{}", bind_ip, port);
     println!("=========================================\n");
 
     let listener = tokio::net::TcpListener::bind(addr).await?;

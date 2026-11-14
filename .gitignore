@@ -4,3 +4,4 @@
 .env
 config.toml
 *.log
+docker-compose.override.yml

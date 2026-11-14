@@ -72,7 +72,7 @@ struct SolidItem {
     size: Option<u64>,
     seeders: Option<u32>,
     leechers: Option<u32>,
-    category: Option<String>,
+    category: Option<Value>,
 }
 
 impl TorrentScraper {
@@ -96,6 +96,15 @@ impl TorrentScraper {
     pub async fn search_fast(&self, query: &str, enabled_providers: &[String], safe_search: bool) -> Result<Vec<SearchResultItem>> {
         let cleaned_query = sanitize_query(query);
         let mut results = self.execute_search_pipeline(&cleaned_query, enabled_providers, safe_search).await;
+
+        if results.is_empty() && query.contains(':') {
+            if let Some((_, subtitle)) = query.split_once(':') {
+                let cleaned_sub = sanitize_query(subtitle);
+                if !cleaned_sub.is_empty() {
+                    results = self.execute_search_pipeline(&cleaned_sub, enabled_providers, safe_search).await;
+                }
+            }
+        }
 
         if results.is_empty() && cleaned_query.contains(' ') {
             let parts: Vec<&str> = cleaned_query.split_whitespace().collect();
@@ -216,7 +225,7 @@ impl TorrentScraper {
     }
 
     pub async fn search_solidtorrents(&self, query: &str, safe_search: bool) -> Result<Vec<SearchResultItem>> {
-        let url = format!("https://solidtorrents.to/api/v1/search?q={}", encode_url(query));
+        let url = format!("https://bitsearch.eu/api/v1/search?q={}", encode_url(query));
         let body_text = self.fetch_url(&url).await?;
 
         let resp: SolidTorrentsResponse = serde_json::from_str(&body_text)
@@ -229,8 +238,15 @@ impl TorrentScraper {
                 if let (Some(title), Some(hash)) = (item.title, item.infohash) {
                     if safe_search {
                         if let Some(ref cat) = item.category {
-                            let cat_l = cat.to_lowercase();
-                            if cat_l.contains("xxx") || cat_l.contains("adult") || cat_l.contains("porn") {
+                            let is_adult_cat = match cat {
+                                Value::String(s) => {
+                                    let cat_l = s.to_lowercase();
+                                    cat_l.contains("xxx") || cat_l.contains("adult") || cat_l.contains("porn")
+                                }
+                                Value::Number(n) => n.as_u64() == Some(10),
+                                _ => false,
+                            };
+                            if is_adult_cat {
                                 continue;
                             }
                         }
@@ -591,7 +607,7 @@ impl TorrentScraper {
 }
 
 pub fn sanitize_query(query: &str) -> String {
-    let re = Regex::new(r"[\(\)\[\]]").unwrap();
+    let re = Regex::new(r#"[\(\)\[\]:;!?,"]"#).unwrap();
     let cleaned = re.replace_all(query, " ");
     cleaned.split_whitespace().collect::<Vec<&str>>().join(" ")
 }
@@ -711,5 +727,14 @@ mod tests {
         assert!(!is_nsfw_title("Inception (2010) [2160p] [4K] [UHD] [REMUX]"));
         assert!(!is_nsfw_title("The Classic Passage of Time"));
         assert!(!is_nsfw_title("Dune: Part Two 2024 1080p WEB-DL"));
+    }
+
+    #[test]
+    fn test_sanitize_query_strips_colons() {
+        assert_eq!(
+            sanitize_query("The Lord of the Rings: The Rings of Power"),
+            "The Lord of the Rings The Rings of Power"
+        );
+        assert_eq!(sanitize_query("Dune: Part Two (2024) [4K]"), "Dune Part Two 2024 4K");
     }
 }
