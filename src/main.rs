@@ -15,7 +15,7 @@ use colored::Colorize;
 #[command(
     name = "jellypull",
     author = "Antigravity Systems",
-    version = "0.1.0",
+    version = "0.2.0",
     about = "Multi-provider torrent search CLI and web UI for Jellyfin media acquisition"
 )]
 struct Cli {

@@ -1,6 +1,6 @@
 [package]
 name = "jellypull"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["Antigravity"]
 description = "A lightweight, high-performance CLI tool and web daemon for media acquisition with qBittorrent and Jellyfin"
