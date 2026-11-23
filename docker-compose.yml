@@ -34,6 +34,35 @@ services:
       - jellypull-scraper
     restart: unless-stopped
 
+  jellypull-ui:
+    image: ghcr.io/vicky31-coder/jellypull-ui:latest
+    build:
+      context: ./ui
+      dockerfile: Dockerfile
+    container_name: jellypull-ui
+    ports:
+      - "${UI_PORT:-8044}:3000"
+    networks:
+      - jellypull-internal
+    environment:
+      - JELLYPULL_API_URL=http://jellypull-web:8045
+      - JELLYPULL_PASSWORD=${JELLYPULL_PASSWORD:-}
+      - APP_USERNAME=${APP_USERNAME:-admin}
+      - APP_PASSWORD=${APP_PASSWORD:-jellypull}
+      - SESSION_SECRET=${SESSION_SECRET:-}
+      - QBIT_URL=${QBIT_URL:-http://host.docker.internal:8085}
+      - QBIT_USERNAME=${QBIT_USERNAME:-}
+      - QBIT_PASSWORD=${QBIT_PASSWORD:-}
+      - DATA_DIR=/app/data
+    volumes:
+      - jellypull-ui-data:/app/data
+    depends_on:
+      - jellypull-web
+    restart: unless-stopped
+
 networks:
   jellypull-internal:
     driver: bridge
+
+volumes:
+  jellypull-ui-data:

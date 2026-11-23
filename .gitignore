@@ -1,6 +1,9 @@
 /target
 /frontend/node_modules
 /frontend/dist
+/ui/node_modules
+/ui/.next
+/ui/data
 .env
 config.toml
 *.log

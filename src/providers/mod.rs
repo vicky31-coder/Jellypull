@@ -1,3 +1,3 @@
 pub mod scraper;
 
-pub use scraper::TorrentScraper;
+pub use scraper::{SearchResultItem, TorrentScraper};

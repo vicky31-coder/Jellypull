@@ -1,0 +1,365 @@
+@import "mdui/mdui.css";
+
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: "Plus Jakarta Sans", "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: rgb(var(--mdui-color-background));
+  color: rgb(var(--mdui-color-on-background));
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.mobile-topbar {
+  display: none;
+}
+
+.sidebar-drawer {
+  --mdui-comp-navigation-drawer-width: 244px;
+}
+
+.sidebar-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px 12px;
+  gap: 16px;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 8px 10px;
+}
+
+.sidebar-brand-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid rgba(var(--mdui-color-outline-variant), 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.main-container {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 24px 28px 56px;
+}
+
+@media (max-width: 840px) {
+  .mobile-topbar {
+    display: flex;
+  }
+  .main-container {
+    padding: 14px 14px 48px;
+  }
+}
+
+.file-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 6px 0;
+  border-top: 1px solid rgba(var(--mdui-color-outline-variant), 0.35);
+  border-bottom: 1px solid rgba(var(--mdui-color-outline-variant), 0.35);
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.file-row:hover {
+  background: rgba(var(--mdui-color-primary), 0.06);
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.stat-card {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgb(var(--mdui-color-surface-container-low));
+  border: 1px solid rgba(var(--mdui-color-outline-variant), 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.stat-label {
+  font-size: 0.74rem;
+  font-weight: 500;
+  color: rgb(var(--mdui-color-on-surface-variant));
+}
+
+.stat-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.results-list,
+.torrents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.item-card {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+}
+
+/* Rounded Pill Search Row + Separate Search & Filter Icons */
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.search-pill-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  height: 50px;
+  padding: 4px 10px 4px 20px;
+  border-radius: 9999px;
+  background: rgb(var(--mdui-color-surface-container-high));
+  border: 1px solid rgba(var(--mdui-color-outline-variant), 0.7);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.search-pill-form:focus-within {
+  border-color: rgb(var(--mdui-color-primary));
+  box-shadow: 0 0 0 2px rgba(var(--mdui-color-primary), 0.18), 0 4px 16px rgba(0, 0, 0, 0.12);
+  background: rgb(var(--mdui-color-surface-container-highest));
+}
+
+.search-pill-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: rgb(var(--mdui-color-on-surface));
+  font-family: inherit;
+  font-size: 0.98rem;
+  padding: 8px 4px;
+}
+
+.search-pill-input::placeholder {
+  color: rgb(var(--mdui-color-on-surface-variant));
+}
+
+/* Collapsible Filter Chip Container */
+.filter-tray {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: rgb(var(--mdui-color-surface-container-low));
+  border: 1px solid rgba(var(--mdui-color-outline-variant), 0.55);
+  margin-bottom: 18px;
+}
+
+.filter-tray-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgb(var(--mdui-color-on-surface-variant));
+  margin-right: 4px;
+}
+
+/* Octopus Rounded Rectangle Brand Badge */
+.brand-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: rgb(var(--mdui-color-primary-container));
+  color: rgb(var(--mdui-color-on-primary-container));
+}
+
+.brand-pill-badge-lg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  padding: 0 22px;
+  border-radius: 16px;
+  background: rgb(var(--mdui-color-primary-container));
+  color: rgb(var(--mdui-color-on-primary-container));
+  margin-bottom: 14px;
+}
+
+/* Settings Section Grouping */
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgb(var(--mdui-color-primary));
+  padding-left: 4px;
+}
+
+/* Material 3 Data Table */
+.results-table-card {
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.results-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.results-table thead th {
+  padding: 14px 16px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgb(var(--mdui-color-on-surface-variant));
+  background: rgb(var(--mdui-color-surface-container-low));
+  border-bottom: 1px solid rgba(var(--mdui-color-outline-variant), 0.6);
+  white-space: nowrap;
+}
+
+.results-table tbody td {
+  padding: 13px 16px;
+  border-bottom: 1px solid rgba(var(--mdui-color-outline-variant), 0.35);
+  vertical-align: middle;
+}
+
+.results-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.results-table tbody tr:hover {
+  background: rgba(var(--mdui-color-primary), 0.05);
+}
+
+.num-cell {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Native MD3 Input Wrapper for 100% Password Manager Autofill */
+.md-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.md-field-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgb(var(--mdui-color-on-surface-variant));
+  padding-left: 4px;
+}
+
+.md-field-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
+  background: rgb(var(--mdui-color-surface-container-lowest));
+  border: 1px solid rgb(var(--mdui-color-outline));
+  transition: border-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.md-field-box:focus-within {
+  border-color: rgb(var(--mdui-color-primary));
+  box-shadow: 0 0 0 2px rgba(var(--mdui-color-primary), 0.18);
+}
+
+.md-field-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: rgb(var(--mdui-color-on-surface));
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.md-field-helper {
+  font-size: 0.76rem;
+  color: rgb(var(--mdui-color-on-surface-variant));
+  padding-left: 4px;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
